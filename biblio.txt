@@ -1,0 +1,48 @@
+Alemão, primeira prova
+Grötzsch, Herbert (1959), "Zur Theorie der diskreten Gebilde, VII: Ein Dreifarbensatz für dreikreisfreie Netze auf der Kugel", Wiss. Z. Martin-Luther-U., Halle-Wittenberg, Math.-Nat. Reihe, 8: 109–120, MR 0116320.
+Inglês, versão dual
+Steinberg, Richard; Younger, D. H. (1989), "Grötzsch's Theorem for the projective plane", Ars Combinatoria, 28: 15–31.
+Mais simples, inspirada em Thomassen
+Asghar, Nabiha (2012), "Grötzsch's Theorem" (PDF), Master's Thesis, University of Waterloo, doi:10.13140/RG.2.1.1326.9367.
+A prova é para C. Nunes da Silva, R.B. Richter and D. Younger
+
+Escolher estudar a de Steinberg-Younger?
+
+Table of contents
+Orientation
+Integer Flow
+Flow Conversation Property
+NWZ flow, NWZ k-flow, NWZ (mod k)-flow
+NWZ (mod 3)-flow ser apenas a orientação: (mod 3)-orientation => # entrada e saída congruente (mod 3)
+Coboundary, cut, k-cut
+Lemma about flows
+Dual of a graph
+List Coloring
+
+História do Teorema:
+Grotzsch (1958) - Every loop-free and triangle-free planar graph is 3-colourable.
+Grunbaum (1963) - Aksionov (1974) - Every planar graph with at most three triangles is 3-colourable.
+Steinberg-Younger’s 3-Flow Theorem (1989) - Every planar graph without 1-cuts and
+with at most three 3-cuts has a NWZ 3-flow. Moreover, every graph without 1-cuts and
+with at most one 3-cut that can be embedded in the projective plane has a NWZ 3-flow.
+Thomassen (2003) - Every planar graph with girth at least five is 3-list-colourable. Moreover, every triangle-free planar graph is 3-colourable.
+Existe um grafo de cintura 4 que não é 3-list-colourable, construído por Margit Voigt
+
+A Prova de Steinberg-Younger inclui grafos que se podem colocar no "Real Projective Plane"
+
+1. Preliminares
+Peripheral and nonperipheral cuts
+"Vértice Distinto": 4- ou 5- vértice d, que não é vértice de corte, onde uma m3 é especificada. Se for 5-valente, terá uma aresta
+com orientação contrária às restantes, chamada da aresta minoritária.
+
+Teorema Seja G um grafo planar sem 1-cuts tal que:
+i) G tem no máx. três 3-cuts, ou
+ii) G tem no máx. um 3-cut e um Vértice Distinto d tal que, se d for 5-valente, então a aresta minoritária não pertence ao 3-cut.
+Então G tem m3 D; no caso ii) D extende a m3 em d.
+
+Prova:
+Indução sobre |E(G)|.
+Caso Base:
+Se G não tem arestas, G são vértices isolados, então satisfaz i) e tem a m3 trivial.
+Se G tem exatamente uma aresta, essa aresta não 1-cut (nunca teria m3), então é loop. Qualquer orientação de G é m3.
+Caso Indutivo:
