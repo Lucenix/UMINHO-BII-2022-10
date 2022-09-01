@@ -214,11 +214,11 @@ int writeHTaux (HT *h, int key, GraphListHead *value) {
         h->aux_array.array[POS(p,1)] = -1;
         h->aux_array.last = p;
         
-
+        if (h->tbl[p].key != DELETED) 
+            h->used++;//increment used
         //copy key from key to hashtable
         h->tbl[p].key = key;
-
-        h->used++;//increment used
+        
         h->entries++;//increment entries
 
     }
