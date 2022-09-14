@@ -138,7 +138,8 @@ int removeEdge(Graph *graph, GraphEdgeNode *nodo) {
     } else {
         read->end = nodo->equiv->prev;
     }
-    
+    printf("Help: %d, %d    ", nodo->equiv->vertex, nodo->vertex);
+    printf("Help: %d, %d\n", nodo->equiv, nodo);
     free(nodo->equiv);
     free(nodo);
     return r;
@@ -535,6 +536,7 @@ int checkPentagramSecurity(Graph *graph, int vertex, int *vertexList, int x1, in
                     return -1;
             }
     }
+    free(trash);
     //se flag == -1, x2 tem C-forbidden.
     if (y != -1) vertexList[5] = y;
     if (flag == -1) return -1;
@@ -898,6 +900,7 @@ int colorDecagram(Graph *graph, VertexQueue *L, int n, int *coloring, int *verte
             }
             tmp = node->next;
             addCloseEdge(graph, L, &n, node);
+            printf("Adjacente: %d (queremos 4)\n", node->vertex);
             removeEdge(graph, node);
             addCloseVertice(graph, L, &n, vertexList[i]);
             addCloseVertice(graph, L, &n, a2);
@@ -909,6 +912,7 @@ int colorDecagram(Graph *graph, VertexQueue *L, int n, int *coloring, int *verte
     addCloseVertice(graph, L, &n, x3);
     node = addEdgePred(graph, x1, x3, predx1, predx3);
     addCloseEdge(graph, L, &n, node);
+    printf("Color Decagram %d %d %d %d %d\n", v1,v2,v3,v4,v5);
 
     coloringRecursiveStep(graph, L, n, coloring, vertexList);
 
@@ -952,7 +956,6 @@ int colorDecagram(Graph *graph, VertexQueue *L, int n, int *coloring, int *verte
             coloring[v4] = i;
         }
     }
-    printf("Color Decagram\n");
     return 0;
 }
 
@@ -1087,7 +1090,7 @@ int coloringRecursiveStep(Graph *graph, VertexQueue *L, int n, int *coloring, in
 
     int v, result;
     for (v = L->queue[--n], L->array[v] = 0; 
-        n>0 && (isfreeHT(graph->graph, v) || ((result = findSecureMultigramFromVertex(graph, v, vertexList)) == -1) || result == 0);
+        n>0 && ((result = isfreeHT(graph->graph, v)) || ((result = findSecureMultigramFromVertex(graph, v, vertexList)) == -1) || result == 0);
         v = L->queue[--n], L->array[v] = 0) {
             if (result == 0) coloring[v] = 0;
         }
@@ -1140,7 +1143,9 @@ int *linearTimeColoring(Graph *graph) {
     }
 
     coloringRecursiveStep(graph, &L, w, coloring, vertexList);
-
+    free(L.array);
+    free(L.queue);
+    free(vertexList);
     return coloring;
 }
 
@@ -1339,7 +1344,8 @@ void generateGraph6(Graph **graph) {
     addEdgePred(g1, 2, 3, head1->start, NULL);
     addEdgePred(g1, 2, 9, head1->start, NULL);
     readHT(g1->graph, 3, &head1);
-    addEdgePred(g1, 3, 4, head1->start, NULL);
+    readHT(g1->graph, 4, &head2);
+    addEdgePred(g1, 3, 4, head1->start, head2->start);
     addEdgePred(g1, 3, 11, head1->start, NULL);
     readHT(g1->graph, 4, &head1);
     addEdgePred(g1, 4, 13, head1->start, NULL);
@@ -1388,8 +1394,8 @@ int main(int argc, char const *argv[])
     //quanto cuidado ter para manter a descrição clockwise
     Graph *g1;
     Graph *g2;
-    generateGraph6(&g1);
-    generateGraph6(&g2);
+    generateGraph1(&g1);
+    generateGraph1(&g2);
     GraphListHead *head1;
     printGraph(g1);
     
