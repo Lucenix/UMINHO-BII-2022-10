@@ -34,6 +34,50 @@ int initGraph(Graph **graph, int nVertices) {
 }
 
 /**
+ * @brief Função que retorna a aresta seguinte, nos ponteiros do relógio, à aresta dada.
+ * 
+ * Se a aresta for única, retorna NULL (a própria não é seguinte a si mesma, ajuda quando se remove).
+ * 
+ * @param graph 
+ * @param edge 
+ * @return GraphEdgeNode* 
+ */
+GraphEdgeNode *nextLoop(Graph *graph, GraphEdgeNode *edge) {
+    GraphEdgeNode *r;
+    if (edge->next == NULL) {
+        GraphListHead *head;
+        readHT(graph->graph, edge->equiv->vertex, &head);
+        if (head->start == edge) r = NULL;
+        else r = head->start;
+    } else {
+        r = edge->next;
+    }
+    return r;
+}
+
+/**
+ * @brief Função que retorna a aresta anterior, nos ponteiros do relógio, à aresta dada.
+ * 
+ * Se a aresta for única, retorna NULL (a própria não é anterior a si mesma, ajuda quando se remove).
+ * 
+ * @param graph 
+ * @param edge 
+ * @return GraphEdgeNode* 
+ */
+GraphEdgeNode *prevLoop(Graph *graph, GraphEdgeNode *edge) {
+    GraphEdgeNode *r;
+    if (edge->prev == NULL) {
+        GraphListHead *head;
+        readHT(graph->graph, edge->equiv->vertex, &head);
+        if (head->end == edge) r = NULL;
+        else r = head->end;
+    } else {
+        r = edge->prev;
+    }
+    return r;
+}
+
+/**
  * @brief Função para dealocar a memória de uma estrutura do tipo Grafo.
  * 
  * @param graph 
@@ -322,27 +366,22 @@ GraphEdgeNode **edgesInFacialWalk(Graph *graph, int vi, GraphEdgeNode *edge, int
  * @return int* 
  */
 int verticesDistanceAtMostTwoFacialWalk(Graph *graph, GraphEdgeNode *edge, int *vertexList) {
-    int i;
+    int i, j;
     GraphEdgeNode *tmp = edge;
     GraphListHead *head;
     for (i = 0; i<7; i++) {
         (vertexList)[i] = -1;
     }
-    readHT(graph->graph, tmp->equiv->vertex, &head);
-    if (tmp->prev == NULL) tmp = head->end->equiv;
-    else tmp = tmp->prev->equiv;
-    readHT(graph->graph, tmp->equiv->vertex, &head);
-    if (tmp->prev == NULL) tmp = head->end->equiv;
-    else tmp = tmp->prev->equiv;
+    if ((tmp = prevLoop(graph, tmp)) == NULL) return -1;
+    if ((tmp = prevLoop(graph, tmp->equiv)) == NULL) return -1;
+    tmp = tmp->equiv;
     (vertexList)[0] = tmp->equiv->vertex;
     for (i = 1; i < 7 && tmp->vertex != (vertexList)[0]; i++) {
-        if (tmp->equiv->next == NULL) {
-            readHT(graph->graph, tmp->vertex, &head);
-            tmp = head->start;
-        } else {
-            tmp = tmp->equiv->next;
-        }
-        (vertexList)[i] = tmp->equiv->vertex;
+        if ((tmp = nextLoop(graph, tmp->equiv)) == NULL) i = 7;
+        else (vertexList)[i] = tmp->equiv->vertex;
+        //for (j = 0; j < i; j++) {
+        //    if (vertexList[j] == vertexList[i]) return -1;
+        //}
     }
     return i <= 6 ? i : -1;
 }
@@ -588,32 +627,6 @@ int findSecureMultigramFromVertex(Graph *graph, int vertex, int *vertexList) {
     return r;
 }
 
-GraphEdgeNode *nextLoop(Graph *graph, GraphEdgeNode *edge) {
-    GraphEdgeNode *r;
-    if (edge->next == NULL) {
-        GraphListHead *head;
-        readHT(graph->graph, edge->equiv->vertex, &head);
-        if (head->start == edge) r = NULL;
-        else r = head->start;
-    } else {
-        r = edge->next;
-    }
-    return r;
-}
-
-GraphEdgeNode *prevLoop(Graph *graph, GraphEdgeNode *edge) {
-    GraphEdgeNode *r;
-    if (edge->prev == NULL) {
-        GraphListHead *head;
-        readHT(graph->graph, edge->equiv->vertex, &head);
-        if (head->end == edge) r = NULL;
-        else r = head->end;
-    } else {
-        r = edge->prev;
-    }
-    return r;
-}
-
 int addCloseToEdge(Graph *graph, VertexQueue *L, int *n, GraphEdgeNode *edge) {
     int vertexList[7];
     int i, r = 0;
@@ -716,6 +729,7 @@ int colorMonogram1(Graph *graph, VertexQueue *L, int n, int *coloring, int v, in
     for (i = 0; i<3; i++) {
         if (coloring[a] != i) coloring[v] = i;
     }
+    printf("Color Monogram 1\n");
     return 0;
 }
 
@@ -739,6 +753,7 @@ int colorMonogram2(Graph *graph, VertexQueue *L, int n, int *coloring, int v, in
     for (i = 0; i<3; i++) {
         if (coloring[a1] != i && coloring[a2] != i) coloring[v] = i;
     }
+    printf("Color Monogram 2\n");
     return 0;
 }
 
@@ -778,6 +793,7 @@ int colorTetagram(Graph *graph, VertexQueue *L, int n, int *coloring, int *verte
 
     coloringRecursiveStep(graph, L, n, coloring, vertexList); //altera o vertexList porque utiliza sempre o mesmo espaço
     coloring[v1] = coloring[v3];
+    printf("Color Tetagram\n");
     return 0;
 }
 
@@ -812,6 +828,7 @@ int colorOctogram(Graph *graph, VertexQueue *L, int n, int *coloring, int *verte
         if (j != coloring[x2] && j != i) coloring[v2] = j;
         if (j != coloring[x4] && j != i) coloring[v4] = j;
     }
+    printf("Color Octagram\n");
     return 0;
 }
 
@@ -855,6 +872,7 @@ int colorHexagram(Graph *graph, VertexQueue *L, int n, int *coloring, int *verte
 
     coloringRecursiveStep(graph, L, n, coloring, vertexList); //altera o vertexList porque utiliza sempre o mesmo espaço
     coloring[v1] = coloring[v3];
+    printf("Color Hexagram\n");
     return 0;
 }
 
@@ -934,7 +952,7 @@ int colorDecagram(Graph *graph, VertexQueue *L, int n, int *coloring, int *verte
             coloring[v4] = i;
         }
     }
-
+    printf("Color Decagram\n");
     return 0;
 }
 
@@ -1055,11 +1073,13 @@ int colorPentagram(Graph *graph, VertexQueue *L, int n, int *coloring, int *vert
         for (i = 0; i<3 && (i == coloring[x2] || i == coloring[x3]); i++) ;
         coloring[v4] = i;
     }
+    printf("Color Pentagram\n");
     return 0;
 }
 
 int coloringRecursiveStep(Graph *graph, VertexQueue *L, int n, int *coloring, int *vertexList) {
-    if (n == 0) return 0;
+    if (n == 0) 
+        return 0;
     if (n == 1) {
         coloring[L->queue[0]] = 0;
         return 1;
@@ -1124,12 +1144,22 @@ int *linearTimeColoring(Graph *graph) {
     return coloring;
 }
 
-int main(int argc, char const *argv[])
-{
+int checkColoring(Graph *graph, int *coloring) {
     int i;
-    //quanto cuidado ter para manter a descrição clockwise
-    Graph *g1;
-    printf("%d\n", initGraph(&g1, 10));   
+    GraphListHead *head;
+    GraphEdgeNode *node;
+    for (i = 0; i < graph->graph->entries; i++) {
+        readHT(graph->graph, i, &head);
+        for (node = head->start; node != NULL; node = node->next) {
+            if (coloring[i] == coloring[node->vertex]) return 0;
+        }
+    }
+    return 1;
+}
+
+void generateGraph1(Graph **graph) {
+    printf("%d\n", initGraph(graph, 10));
+    Graph *g1 = (*graph);
     GraphListHead *head1, *head2;
     readHT(g1->graph, 0, &head1);
     readHT(g1->graph, 6, &head2);
@@ -1178,62 +1208,200 @@ int main(int argc, char const *argv[])
     addEdgePred(g1, 9, 3, head1->start, head2->start);
     //readHT(g1->graph, 6, &head1);
     //addEdgePred(g1, 6, 8, head1->start, head2->start);
-    printGraph(g1);
-    //removeEdge(g1, g1->array[2].start->next);
-    //printGraph(g1);
-    //printf("Aresta final do vértice 2: %d\n", g1->graph->tbl[hash(g1->graph, 2)].value->start->next->vertex);
+}
 
-    //printf("Aresta final do vértice 0: %d\n", g1->graph->tbl[hash(g1->graph, 0)].value->end->vertex);
-    //printf("Adjacente: %d\n", checkAdjacent(g1, 0, 2));
-    //printf("Distância no max 2: %d, %d\n",checkDistanceAtMostTwo(g1, 4, 0), checkDistanceAtMostTwo(g1, 2, 0));
+void generateGraph2(Graph **graph) {
+    printf("%d\n", initGraph(graph, 12));
+    Graph *g2 = (*graph);
+    GraphListHead *head1, *head2;
+    readHT(g2->graph, 0, &head1);
+    addEdgePred(g2, 0, 1, head1->start, NULL);
+    addEdgePred(g2, 0, 2, head1->start, NULL);
+    addEdgePred(g2, 0, 3, head1->start, NULL);
+    readHT(g2->graph, 1, &head1);
+    addEdgePred(g2, 1, 11, head1->start, NULL);
+    addEdgePred(g2, 1, 10, head1->start, NULL);
+    addEdgePred(g2, 1, 4, head1->start, NULL);
+    readHT(g2->graph, 2, &head1);
+    addEdgePred(g2, 2, 5, head1->start, NULL);
+    addEdgePred(g2, 2, 6, head1->start, NULL);
+    readHT(g2->graph, 3, &head1);
+    readHT(g2->graph, 10, &head2);
+    addEdgePred(g2, 3, 7, head1->start, NULL);
+    addEdgePred(g2, 3, 10, head1->start, head2->start);
+    readHT(g2->graph, 4, &head1);
+    addEdgePred(g2, 4, 8, head1->start, NULL);
+    readHT(g2->graph, 8, &head1);
+    readHT(g2->graph, 5, &head2);
+    addEdgePred(g2, 8, 5, head1->start, head2->start);
+    readHT(g2->graph, 9, &head1);
+    readHT(g2->graph, 6, &head2);
+    addEdgePred(g2, 9, 6, head1->start, head2->start);
+    readHT(g2->graph, 7, &head2);
+    addEdgePred(g2, 9, 7, head1->start, head2->start);
+}
 
+
+void generateGraph3(Graph **graph) {
+    printf("%d\n", initGraph(graph, 17));
+    Graph *g2 = (*graph);
+    GraphListHead *head1, *head2;
+    readHT(g2->graph, 1, &head1);
+    addEdgePred(g2, 1, 4, head1->start, NULL);
+    addEdgePred(g2, 1, 2, head1->start, NULL);
+    readHT(g2->graph, 4, &head1);
+    addEdgePred(g2, 4, 3, head1->start, NULL);
+    readHT(g2->graph, 2, &head1);
+    addEdgePred(g2, 2, 0, head1->start, NULL);
+    addEdgePred(g2, 2, 5, head1->start, NULL);
+    addEdgePred(g2, 2, 6, head1->start, NULL);
+    readHT(g2->graph, 3, &head1);
+    readHT(g2->graph, 0, &head2);
+    addEdgePred(g2, 3, 7, head1->start, NULL);
+    addEdgePred(g2, 3, 0, head1->start, head2->start);
+    readHT(g2->graph, 0, &head1);
+    addEdgePred(g2, 0, 8, head1->start, NULL);
+    readHT(g2->graph, 5, &head1);
+    readHT(g2->graph, 8, &head2);
+    addEdgePred(g2, 5, 8, head1->start, head2->start);
+    addEdgePred(g2, 5, 9, head1->start, NULL);
+    readHT(g2->graph, 6, &head1);
+    addEdgePred(g2, 6, 10, head1->start, NULL);
+    readHT(g2->graph, 7, &head1);
+    addEdgePred(g2, 7, 11, head1->start, NULL);
+    readHT(g2->graph, 8, &head1);
+    addEdgePred(g2, 8, 12, head1->start, NULL);
+    addEdgePred(g2, 8, 13, head1->start, NULL);
+    readHT(g2->graph, 9, &head1);
+    readHT(g2->graph, 10, &head2);
+    addEdgePred(g2, 9, 14, head1->start, NULL);
+    addEdgePred(g2, 9, 10, head1->start, head2->start);
+    readHT(g2->graph, 11, &head1);
+    readHT(g2->graph, 12, &head2);
+    addEdgePred(g2, 11, 12, head1->start, head2->start);
+    readHT(g2->graph, 13, &head1);
+    addEdgePred(g2, 13, 15, head1->start, NULL);
+    addEdgePred(g2, 13, 14, head1->start, NULL);
+    readHT(g2->graph, 14, &head1);
+    addEdgePred(g2, 14, 16, head1->start, NULL);
+}
+
+void generateGraph4(Graph **graph) {
+    initGraph(graph, 2);
+    addEdgePred((*graph), 0, 1, NULL, NULL);
+}
+
+void generateGraph5(Graph **graph) {
+    initGraph(graph, 12);
+    Graph *g1 = (*graph);
+    GraphListHead *head1, *head2;
     readHT(g1->graph, 0, &head1);
-    GraphEdgeNode **faceWalk = edgesInFacialWalk(g1, 0, head1->end, 4);
-    printf("Arestas na face contida incidente em 0 (espera-se 1 2 3 0):");
-    for (i = 0; i<4; i++) {
-        if (faceWalk[i] != NULL)
-            printf(" %d", faceWalk[i]->vertex);
-    }
-    putchar('\n');
-    free(faceWalk);
+    addEdgePred(g1, 0, 1, head1->start, NULL);
+    addEdgePred(g1, 0, 11, head1->start, NULL);
+    addEdgePred(g1, 0, 4, head1->start, NULL);
+    readHT(g1->graph, 1, &head1);
+    addEdgePred(g1, 1, 2, head1->start, NULL);
+    readHT(g1->graph, 2, &head1);
+    addEdgePred(g1, 2, 3, head1->start, NULL);
+    addEdgePred(g1, 2, 8, head1->start, NULL);
+    readHT(g1->graph, 3, &head1);
+    readHT(g1->graph, 4, &head2);
+    addEdgePred(g1, 12, 4, NULL, head2->start);
+    addEdgePred(g1, 3, 4, head1->start, head2->start);
+    addEdgePred(g1, 3, 10, head1->start, NULL);
+    readHT(g1->graph, 5, &head1);
+    readHT(g1->graph, 11, &head2);
+    addEdgePred(g1, 5, 11, head1->start, head2->start);
+    addEdgePred(g1, 5, 6, head1->start, NULL);
+    readHT(g1->graph, 6, &head1);
+    addEdgePred(g1, 6, 7, head1->start, NULL);
+    readHT(g1->graph, 8, &head1);
+    readHT(g1->graph, 7, &head2);
+    addEdgePred(g1, 8, 9, head1->start, NULL);
+    addEdgePred(g1, 8, 7, head1->start, head2->start);
+    readHT(g1->graph, 9, &head1);
+    readHT(g1->graph, 10, &head2);
+    addEdgePred(g1, 9, 10, head1->start, head2->start);
+}
 
-    int *vertexList = malloc(sizeof(int)*7);
-    printf("Será que a componente tem tamanho at most 6? %d\n", 
-        verticesDistanceAtMostTwoFacialWalk(g1, g1->graph->tbl[hash(g1->graph, 0)].value->end, vertexList));
-    printf("Vértices a 2 de distância (espera-se 5 6 0 1):");
-    for (int i = 0; i<7; i++) {
-        printf(" %d", vertexList[i]);
-    }
-    putchar('\n');
+void generateGraph6(Graph **graph) {
+    initGraph(graph, 20);
+    Graph *g1 = (*graph);
+    GraphListHead *head1, *head2;
+    readHT(g1->graph, 0, &head1);
+    addEdgePred(g1, 0, 4, head1->start, NULL);
+    addEdgePred(g1, 0, 1, head1->start, NULL);
+    addEdgePred(g1, 0, 5, head1->start, NULL);
+    readHT(g1->graph, 1, &head1);
+    addEdgePred(g1, 1, 2, head1->start, NULL);
+    addEdgePred(g1, 1, 7, head1->start, NULL);
+    readHT(g1->graph, 2, &head1);
+    addEdgePred(g1, 2, 3, head1->start, NULL);
+    addEdgePred(g1, 2, 9, head1->start, NULL);
+    readHT(g1->graph, 3, &head1);
+    addEdgePred(g1, 3, 4, head1->start, NULL);
+    addEdgePred(g1, 3, 11, head1->start, NULL);
+    readHT(g1->graph, 4, &head1);
+    addEdgePred(g1, 4, 13, head1->start, NULL);
+    readHT(g1->graph, 5, &head1);
+    addEdgePred(g1, 5, 6, head1->start, NULL);
+    addEdgePred(g1, 5, 14, head1->start, NULL);
+    readHT(g1->graph, 14, &head1);
+    readHT(g1->graph, 13, &head2);
+    addEdgePred(g1, 14, 15, head1->start, NULL);
+    addEdgePred(g1, 14, 13, head1->start, head2->start);
+    readHT(g1->graph, 12, &head1);
+    addEdgePred(g1, 12, 13, head1->start, head2->start);
+    addEdgePred(g1, 12, 19, head1->start, NULL);
+    readHT(g1->graph, 11, &head2);
+    addEdgePred(g1, 12, 11, head1->start, head2->start);
+    readHT(g1->graph, 10, &head1);
+    addEdgePred(g1, 10, 11, head1->start, head2->start);
+    addEdgePred(g1, 10, 18, head1->start, NULL);
+    readHT(g1->graph, 9, &head2);
+    addEdgePred(g1, 10, 9, head1->start, head2->start);
+    readHT(g1->graph, 8, &head1);
+    addEdgePred(g1, 8, 9, head1->start, head2->start);
+    addEdgePred(g1, 8, 17, head1->start, NULL);
+    readHT(g1->graph, 7, &head2);
+    addEdgePred(g1, 8, 7, head1->start, head2->start);
+    readHT(g1->graph, 6, &head1);
+    addEdgePred(g1, 6, 7, head1->start, head2->start);
+    addEdgePred(g1, 6, 16, head1->start, NULL);
+    readHT(g1->graph, 15, &head1);
+    readHT(g1->graph, 16, &head2);
+    addEdgePred(g1, 15, 16, head1->start, head2->start);
+    readHT(g1->graph, 19, &head2);
+    addEdgePred(g1, 15, 19, head1->start, head2->start);
+    readHT(g1->graph, 18, &head1);
+    addEdgePred(g1, 18, 19, head1->start, head2->start);
+    readHT(g1->graph, 17, &head2);
+    addEdgePred(g1, 18, 17, head1->start, head2->start);
+    readHT(g1->graph, 16, &head1);
+    addEdgePred(g1, 16, 17, head1->start, head2->start);
+}
 
-    //int list[] = {0,2};
-    //Graph *subg1 = subgraphFromPath(g1, list, 2);
-    //printGraph(subg1);
-    //freeGraph(subg1);
 
-    printf("Got %d: ", findSecureMultigramFromVertex(g1, 5, vertexList));
-    for (i = 0; i<7; i++) printf(" %d", vertexList[i]);
-    putchar('\n');
-
-    //printf("Got %d: ", findSecureMultigramFromVertex(g1, 4, vertexList));
-    //for (i = 0; i<7; i++) printf(" %d", vertexList[i]);
-    //putchar('\n');
-//
-    //printf("Got %d: ", findSecureMultigramFromVertex(g1, 3, vertexList));
-    //for (i = 0; i<7; i++) printf(" %d", vertexList[i]);
-    //putchar('\n');
-    //printf("Got %d\n", findSecureMultigramFromVertex(g1, 1, vertexList));
-    //printf("Got %d\n", findSecureMultigramFromVertex(g1, 2, vertexList));
-    //printf("Got %d\n", findSecureMultigramFromVertex(g1, 3, vertexList));
-    free(vertexList);
+int main(int argc, char const *argv[])
+{
+    int i;
+    //quanto cuidado ter para manter a descrição clockwise
+    Graph *g1;
+    Graph *g2;
+    generateGraph6(&g1);
+    generateGraph6(&g2);
+    GraphListHead *head1;
+    printGraph(g1);
     
     int n = g1->graph->entries;
     int *coloring = linearTimeColoring(g1);
     printf("Coloração de g1:\n");
     for (i = 0; i < n; i++) printf("Cor de %d: %d\n", i, coloring[i]);
+
+    printf("Gottem. %d\n", checkColoring(g2, coloring));
+    //printf("Gottem.\n");
     free(coloring);
-
-    printf("Gottem.\n");
-
+    freeGraph(g1);
+    freeGraph(g2);
     return 0;
 }

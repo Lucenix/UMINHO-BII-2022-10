@@ -4,6 +4,10 @@ Inglês, versão dual
 Steinberg, Richard; Younger, D. H. (1989), "Grötzsch's Theorem for the projective plane", Ars Combinatoria, 28: 15–31.
 Mais simples, inspirada em Thomassen
 Asghar, Nabiha (2012), "Grötzsch's Theorem" (PDF), Master's Thesis, University of Waterloo, doi:10.13140/RG.2.1.1326.9367.
+Z. Dvorak, K. Kawarabayashi and R. Thomas, Three-coloring triangle-free planar graphs in linear time, Proceedings of the Twentieth Annual ACM-SIAM Symposium on Discrete Algorithms, 1176-1182, SIAM, Philadelphia, PA, 2009.
+B. Mohar and C. Thomassen, Graphs on Surfaces, The Johns Hopkins University Press, Baltimore and London, 2001.
+W.-K. Shih and W.-L. Hsu, A new planarity test, Theoret. Comp. Sci. 223 (1999), 179–191.
+Wang, Qianli https://github.com/qiaw99/3-coloring-polynomial-time/blob/master/thesis/Qianli_Wang_Bachelor_Thesis.pdf
 A prova é para C. Nunes da Silva, R.B. Richter and D. Younger
 
 Escolher estudar a de Steinberg-Younger?

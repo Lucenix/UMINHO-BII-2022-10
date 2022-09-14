@@ -125,9 +125,6 @@ void AuxFree(HT *h) {
     if(h->aux_array.array) {
         free(h->aux_array.array);
     }
-    //for(int i = 0; i < h->size; i++) {
-    //    free(h->tbl[i].key);
-    //}
     free(h->tbl);
 }
 
@@ -137,21 +134,7 @@ void AuxFree(HT *h) {
  * @param h hashtable to free
  */
 void freeHT(HT *h) {
-    //lucena: espalhei condições de teste só para não dar free a coisas que já possam estar a null (tentar proteger de segfaults idiotas)
-
-    //aux_array check
-    
     free(h->aux_array.array);
-    
-    //for(int i = 0; i < h->size; i++) {
-    //    
-    //    if(h->tbl[i].value != NULL){//free all allocated values
-    //        freeValueHT(h, i, 1);
-    //    }
-    //    if (h->tbl[i].key) {
-    //        free(h->tbl[i].key);//free all keys
-    //    }
-    //}
     if (h->tbl) {
         free(h->tbl);//free hashtable
     }
@@ -194,11 +177,6 @@ int writeHTaux (HT *h, int key, GraphListHead *value) {
     //increments p until free position is found
     for(; !isfreeHT(h, p) && (flag = keycmp(h, key,(h->tbl)[p].key)); p = (p+1)%(h->size));
 
-    //if value is already allocated free it
-    //if(h->tbl[p].value != NULL){
-    //    freeValueHT(h, p, 1);
-    //}
-
     //copy value from value to hashtable
     h->tbl[p].value = value;
     
@@ -211,7 +189,7 @@ int writeHTaux (HT *h, int key, GraphListHead *value) {
             h->aux_array.array[POS(last,1)] = p;
         }
         h->aux_array.array[POS(p,0)] = last;
-        h->aux_array.array[POS(p,1)] = -1;
+        //h->aux_array.array[POS(p,1)] = -1;
         h->aux_array.last = p;
         
         if (h->tbl[p].key != DELETED) 
@@ -297,16 +275,6 @@ int writeHT (HT *h, int key, GraphListHead *value) {
 int readHT(HT *h, int key, GraphListHead** value){
 
     int p , r = -1 , c = h->size, flg = 1;
-    //key_type check
-    //if (h->key_type == STRING) {
-    //    empty = (void*)EMPTY_STRING;
-    //}else if (h->key_type == PID_T) {
-    //    pid_t tmp = EMPTY_PID_T;
-    //    empty = (void*)&tmp;
-    //}else{
-    //    return -1;
-    //}
-
     //tries to find key in hashtable, stops if finds EMPTY key or if all table positions have been checked
     for(p = hash(h, key); keycmp(h, key,(h->tbl)[p].key) && (c > 0) && (flg = keycmp(h, EMPTY,(h->tbl)[p].key)); c--){
         p = (p+1)%(h->size);
@@ -361,12 +329,3 @@ int deleteHT (HT *h, int key) {
     }
     return p;
 }
-
-//int printHT(HT *h) {
-//    for(int i = 0; i < h->size; i++) {
-//        printf("%d -> (%d,%d)\n",i ,((h->tbl)[i].key), ((h->tbl)[i].value));
-//    }
-//    putchar('\n');
-//    return 0;
-//    
-//}
