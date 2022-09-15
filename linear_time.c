@@ -340,12 +340,13 @@ GraphEdgeNode **edgesInFacialWalk(Graph *graph, int vi, GraphEdgeNode *edge, int
     int i;
     GraphListHead *head;
     for (i = 1; i < k && edge->vertex != vi; i++) {
-        if (edge->equiv->next == NULL) {
-            readHT(graph->graph, edge->vertex, &head);
-            edge = head->start;
-        } else {
-            edge = edge->equiv->next;
-        }
+        edge = nextLoop(graph, edge->equiv);
+        //if (edge->equiv->next == NULL) {
+        //    readHT(graph->graph, edge->vertex, &head);
+        //    edge = head->start;
+        //} else {
+        //    edge = edge->equiv->next;
+        //}
         list[i] = edge;
     }
     return list;
@@ -380,11 +381,9 @@ int verticesDistanceAtMostTwoFacialWalk(Graph *graph, GraphEdgeNode *edge, int *
     for (i = 1; i < 7 && tmp->vertex != (vertexList)[0]; i++) {
         if ((tmp = nextLoop(graph, tmp->equiv)) == NULL) i = 7;
         else (vertexList)[i] = tmp->equiv->vertex;
-        //for (j = 0; j < i; j++) {
-        //    if (vertexList[j] == vertexList[i]) return -1;
-        //}
     }
-    return i <= 6 ? i : -1;
+    if (tmp != NULL) tmp = nextLoop(graph, tmp->equiv);
+    return i <= 6 && tmp && tmp->vertex == vertexList[1] ? i : -1;
 }
 
 Graph *subgraphClose(Graph *graph, int v) {
@@ -675,7 +674,7 @@ int addCloseVertice(Graph *graph, VertexQueue *L, int *n, int vertice) {
     for (node = head->start; node != NULL; node = node->next) {
         r += addCloseEdge(graph, L, n, node);
         if (checkDegree(graph, node->vertex) < 60) {
-            if (L->array[node->vertex] == 0) {
+            if (checkDegree(graph, node->vertex) == 3 && L->array[node->vertex] == 0) {
                 L->array[node->vertex] = 1;
                 L->queue[(*n)++] = node->vertex;
                 r++;
@@ -727,11 +726,11 @@ int colorMonogram1(Graph *graph, VertexQueue *L, int n, int *coloring, int v, in
     removeEdge(graph, head->start);
     addCloseVertice(graph, L, &n, a);
     addCloseVertice(graph, L, &n, v);
+    printf("Color Monogram 1\n");
     coloringRecursiveStep(graph, L, n, coloring, vertexList);
     for (i = 0; i<3; i++) {
         if (coloring[a] != i) coloring[v] = i;
     }
-    printf("Color Monogram 1\n");
     return 0;
 }
 
@@ -751,11 +750,11 @@ int colorMonogram2(Graph *graph, VertexQueue *L, int n, int *coloring, int v, in
     //add to L all close to head->end and head->start and a1, a2
     addCloseVertice(graph, L, &n, a1);
     addCloseVertice(graph, L, &n, a2);
+    printf("Color Monogram 2\n");
     coloringRecursiveStep(graph, L, n, coloring, vertexList);
     for (i = 0; i<3; i++) {
         if (coloring[a1] != i && coloring[a2] != i) coloring[v] = i;
     }
-    printf("Color Monogram 2\n");
     return 0;
 }
 
@@ -795,7 +794,7 @@ int colorTetagram(Graph *graph, VertexQueue *L, int n, int *coloring, int *verte
 
     coloringRecursiveStep(graph, L, n, coloring, vertexList); //altera o vertexList porque utiliza sempre o mesmo espaço
     coloring[v1] = coloring[v3];
-    printf("Color Tetagram\n");
+    printf("Color Tetagram %d %d %d %d\n", vertexList[2], vertexList[3], vertexList[0], vertexList[1]);
     return 0;
 }
 
@@ -821,6 +820,7 @@ int colorOctogram(Graph *graph, VertexQueue *L, int n, int *coloring, int *verte
         }
         removeIsolatedVertex(graph, vertexList[i]);
     }
+    printf("Color Octagram\n");
     coloringRecursiveStep(graph, L, n, coloring, vertexList);
 
     for (i = 0; i<3 && (coloring[x1] == i || coloring[x3] == i); i++) ;
@@ -830,7 +830,6 @@ int colorOctogram(Graph *graph, VertexQueue *L, int n, int *coloring, int *verte
         if (j != coloring[x2] && j != i) coloring[v2] = j;
         if (j != coloring[x4] && j != i) coloring[v4] = j;
     }
-    printf("Color Octagram\n");
     return 0;
 }
 
@@ -872,9 +871,9 @@ int colorHexagram(Graph *graph, VertexQueue *L, int n, int *coloring, int *verte
     addCloseVertice(graph, L, &n, vertexList[3]); //pelas arestas que não adicionei
     addCloseEdge(graph, L, &n, pred3); //v3-v2
 
+    printf("Color Hexagram\n");
     coloringRecursiveStep(graph, L, n, coloring, vertexList); //altera o vertexList porque utiliza sempre o mesmo espaço
     coloring[v1] = coloring[v3];
-    printf("Color Hexagram\n");
     return 0;
 }
 
@@ -1036,7 +1035,7 @@ int colorPentagram(Graph *graph, VertexQueue *L, int n, int *coloring, int *vert
         addCloseVertice(graph, L, &n, a2);
     }
     removeIsolatedVertex(graph, x3);
-
+    printf("Color Pentagram %d %d %d %d %d\n", v1, v2, v3, v4, v5);
     coloringRecursiveStep(graph, L, n, coloring, vertexList);
 
     coloring[x3] = coloring[x4];
@@ -1076,7 +1075,6 @@ int colorPentagram(Graph *graph, VertexQueue *L, int n, int *coloring, int *vert
         for (i = 0; i<3 && (i == coloring[x2] || i == coloring[x3]); i++) ;
         coloring[v4] = i;
     }
-    printf("Color Pentagram\n");
     return 0;
 }
 
@@ -1387,6 +1385,39 @@ void generateGraph6(Graph **graph) {
     addEdgePred(g1, 16, 17, head1->start, head2->start);
 }
 
+void generateGraph7(Graph **graph) {
+    initGraph(graph, 6);
+    Graph *g1 = (*graph);
+    GraphListHead *head1, *head2;
+    readHT(g1->graph, 0, &head1);
+    addEdgePred(g1, 0, 1, head1->start, NULL);
+    addEdgePred(g1, 0, 2, head1->start, NULL);
+    addEdgePred(g1, 0, 3, head1->start, NULL);
+    readHT(g1->graph, 1, &head1);
+    addEdgePred(g1, 1, 4, head1->start, NULL);
+    readHT(g1->graph, 2, &head1);
+    readHT(g1->graph, 4, &head2);
+    addEdgePred(g1, 2, 4, head1->start, head2->start);
+    readHT(g1->graph, 3, &head1);
+    addEdgePred(g1, 3, 5, head1->start, NULL);
+}
+
+void generateGraph8(Graph **graph) {
+    initGraph(graph, 6);
+    Graph *g1 = (*graph);
+    GraphListHead *head1, *head2;
+    readHT(g1->graph, 0, &head1);
+    addEdgePred(g1, 0, 1, head1->start, NULL);
+    addEdgePred(g1, 0, 3, head1->start, NULL);
+    addEdgePred(g1, 0, 2, head1->start, NULL);
+    readHT(g1->graph, 1, &head1);
+    addEdgePred(g1, 1, 4, head1->start, NULL);
+    readHT(g1->graph, 2, &head1);
+    readHT(g1->graph, 4, &head2);
+    addEdgePred(g1, 2, 4, head1->start, head2->start);
+    readHT(g1->graph, 3, &head1);
+    addEdgePred(g1, 3, 5, head1->start, NULL);
+}
 
 int main(int argc, char const *argv[])
 {
@@ -1394,11 +1425,11 @@ int main(int argc, char const *argv[])
     //quanto cuidado ter para manter a descrição clockwise
     Graph *g1;
     Graph *g2;
-    generateGraph1(&g1);
-    generateGraph1(&g2);
+    generateGraph8(&g1);
+    generateGraph8(&g2);
     GraphListHead *head1;
     printGraph(g1);
-    
+
     int n = g1->graph->entries;
     int *coloring = linearTimeColoring(g1);
     printf("Coloração de g1:\n");
