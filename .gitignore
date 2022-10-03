@@ -1,2 +1,4 @@
 *.out
 *.exe
+hashtable.s
+linear_time.s

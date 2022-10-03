@@ -145,6 +145,16 @@ int removeEdge(Graph *graph, GraphEdgeNode *nodo) {
     return r;
 }
 
+/**
+ * @brief Função que adiciona uma aresta entre dois vértices, dadas arestas predecessoras a adicionar.
+ * 
+ * @param graph 
+ * @param one 
+ * @param two 
+ * @param pred1 
+ * @param pred2 
+ * @return GraphEdgeNode* Devolve a aresta criada a partir de one, após o pred1.
+ */
 GraphEdgeNode *addEdgePred(Graph *graph, int one, int two, GraphEdgeNode *pred1, GraphEdgeNode *pred2) {    
     int r = 0;
     GraphEdgeNode *new1, *new2;
